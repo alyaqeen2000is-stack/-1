@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>دوري أبطال الفصل ⚽</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Tahoma", "Arial", sans-serif;
+    background:
+        radial-gradient(circle at top, #dff7ff, transparent 35%),
+        linear-gradient(135deg, #e9f8ff, #f8fbff);
+    color: #17324d;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* رأس الصفحة */
+.header {
+    text-align: center;
+    padding: 20px 15px 10px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 46px);
+    color: #176b42;
+    text-shadow: 2px 3px 0 white;
+}
+
+.header p {
+    margin: 7px 0;
+    font-size: 18px;
+    color: #526779;
+    font-weight: bold;
+}
+
+/* التخطيط */
+.app {
+    width: 96%;
+    max-width: 1450px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 18px;
+    align-items: start;
+}
+
+/* لوحة الأدوات */
+.tools {
+    background: rgba(255,255,255,.95);
+    border-radius: 25px;
+    padding: 15px;
+    box-shadow: 0 10px 30px rgba(25,70,100,.15);
+    border: 3px solid #e3f0f6;
+    position: sticky;
+    top: 15px;
+    z-index: 20;
+}
+
+.tools h2 {
+    text-align: center;
+    margin: 0 0 12px;
+    color: #176b42;
+    font-size: 21px;
+}
+
+.tool {
+    user-select: none;
+    cursor: grab;
+    border-radius: 18px;
+    padding: 13px 8px;
+    margin: 10px 0;
+    text-align: center;
+    background: #f5faff;
+    border: 2px dashed #b9d8e7;
+    transition: .2s;
+}
+
+.tool:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 7px 15px rgba(0,0,0,.12);
+}
+
+.tool:active {
+    cursor: grabbing;
+    transform: scale(.96);
+}
+
+.tool-icon {
+    font-size: 47px;
+    display: block;
+    line-height: 1;
+}
+
+.tool-name {
+    font-weight: bold;
+    margin-top: 8px;
+    font-size: 15px;
+}
+
+.tool-points {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.goal .tool-points {
+    background: #d8f7e4;
+    color: #13723c;
+}
+
+.yellow .tool-points {
+    background: #fff2bd;
+    color: #936f00;
+}
+
+.red .tool-points {
+    background: #ffd7d7;
+    color: #a90000;
+}
+
+/* منطقة الملاعب */
+.stadium-area {
+    position: relative;
+}
+
+/* الملعب */
+.fields {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.field-card {
+    position: relative;
+    min-height: 300px;
+    border-radius: 25px;
+    padding: 12px;
+    overflow: hidden;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #4da95d 0,
+            #4da95d 50px,
+            #48a257 50px,
+            #48a257 100px
+        );
+    box-shadow:
+        inset 0 0 0 4px rgba(255,255,255,.75),
+        0 10px 22px rgba(20,80,40,.18);
+    transition: .3s;
+}
+
+.field-card.drag-over {
+    transform: scale(1.025);
+    box-shadow:
+        inset 0 0 0 5px #ffe45c,
+        0 0 25px rgba(255,220,50,.8);
+}
+
+/* خطوط الملعب */
+.field-lines {
+    position: absolute;
+    inset: 15px;
+    border: 3px solid rgba(255,255,255,.9);
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.field-lines::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    border-left: 3px solid rgba(255,255,255,.9);
+}
+
+.field-lines::after {
+    content: "";
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border: 3px solid rgba(255,255,255,.9);
+    border-radius: 50%;
+    left: calc(50% - 36px);
+    top: calc(50% - 36px);
+}
+
+.goal-box {
+    position: absolute;
+    width: 45px;
+    height: 105px;
+    top: calc(50% - 52px);
+    border: 3px solid rgba(255,255,255,.9);
+}
+
+.goal-left {
+    left: 0;
+    border-left: none;
+}
+
+.goal-right {
+    right: 0;
+    border-right: none;
+}
+
+/* اسم المجموعة */
+.group-name {
+    position: relative;
+    z-index: 3;
+    width: 85%;
+    margin: 4px auto;
+    display: block;
+    text-align: center;
+    border: none;
+    outline: none;
+    border-radius: 15px;
+    padding: 8px;
+    font-size: 19px;
+    font-weight: bold;
+    background: rgba(255,255,255,.93);
+    color: #17445e;
+}
+
+/* منطقة الإسقاط */
+.drop-zone {
+    position: relative;
+    z-index: 4;
+    height: 165px;
+    margin-top: 5px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 8px;
+}
+
+/* الرموز التي تم إسقاطها */
+.dropped-item {
+    font-size: 30px;
+    animation: pop .35s ease;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,.25));
+}
+
+@keyframes pop {
+    0% { transform: scale(0) rotate(-20deg); }
+    70% { transform: scale(1.25) rotate(10deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+/* الرصيد */
+.score-box {
+    position: relative;
+    z-index: 5;
+    background: rgba(255,255,255,.95);
+    border-radius: 20px;
+    text-align: center;
+    padding: 7px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.12);
+}
+
+.score-label {
+    font-size: 13px;
+    color: #647786;
+    font-weight: bold;
+}
+
+.score {
+    font-size: 36px;
+    font-weight: 900;
+    color: #176b42;
+    line-height: 1.1;
+}
+
+.score.negative {
+    color: #c52b2b;
+}
+
+/* الأزرار السفلية */
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 22px 0;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    border: none;
+    border-radius: 18px;
+    padding: 14px 25px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 6px 0 rgba(0,0,0,.16);
+    transition: .15s;
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+}
+
+.action-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 rgba(0,0,0,.16);
+}
+
+.calculate {
+    background: #176b42;
+}
+
+.reset {
+    background: #e05252;
+}
+
+/* السجل */
+.history {
+    background: rgba(255,255,255,.94);
+    border-radius: 22px;
+    padding: 15px;
+    box-shadow: 0 8px 22px rgba(30,70,100,.12);
+    margin-bottom: 25px;
+}
+
+.history h2 {
+    text-align: center;
+    margin: 0 0 10px;
+    color: #176b42;
+}
+
+.history-list {
+    max-height: 170px;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 7px 10px;
+    margin: 5px 0;
+    border-radius: 12px;
+    background: #f3f8fb;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* شاشة الفوز */
+.winner-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(10,35,55,.75);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.winner-overlay.show {
+    display: flex;
+}
+
+.winner-box {
+    background: white;
+    border-radius: 35px;
+    padding: 30px;
+    text-align: center;
+    width: min(600px, 95%);
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    animation: winnerIn .6s ease;
+}
+
+@keyframes winnerIn {
+    from {
+        opacity: 0;
+        transform: scale(.5) translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.trophy {
+    font-size: 100px;
+    animation: trophy 1s infinite alternate;
+}
+
+@keyframes trophy {
+    from { transform: rotate(-7deg) scale(1); }
+    to { transform: rotate(7deg) scale(1.08); }
+}
+
+.winner-box h2 {
+    color: #176b42;
+    font-size: 30px;
+    margin: 5px;
+}
+
+.winner-score {
+    font-size: 23px;
+    font-weight: bold;
+    margin: 10px;
+}
+
+.close-btn {
+    border: none;
+    background: #176b42;
+    color: white;
+    border-radius: 15px;
+    padding: 12px 30px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 17px;
+}
+
+/* قصاصات الاحتفال */
+.confetti {
+    position: fixed;
+    top: -20px;
+    z-index: 150;
+    font-size: 25px;
+    pointer-events: none;
+    animation: fall 2.5s linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* رسالة */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 25px;
+    transform: translateX(-50%) translateY(100px);
+    background: #17324d;
+    color: white;
+    padding: 12px 22px;
+    border-radius: 20px;
+    font-weight: bold;
+    z-index: 200;
+    opacity: 0;
+    transition: .3s;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* الهواتف */
+@media (max-width: 1000px) {
+    .app {
+        grid-template-columns: 1fr;
+    }
+
+    .tools {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .tools h2 {
+        grid-column: 1 / -1;
+    }
+
+    .tool {
+        margin: 0;
+    }
+}
+
+@media (max-width: 700px) {
+    .fields {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .field-card {
+        min-height: 270px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fields {
+        grid-template-columns: 1fr;
+    }
+
+    .tools {
+        grid-template-columns: 1fr;
+    }
+
+    .action-btn {
+        width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <h1>🏆 دوري أبطال الفصل ⚽</h1>
+    <p>بالاجتهاد والعزيمة أجمع نقاطي 🌟</p>
+</header>
+
+<div class="app">
+
+    <!-- الأدوات -->
+    <aside class="tools">
+
+        <h2>🎯 أدوات المعلم</h2><div style="font-size:12px;text-align:center;color:#647786;margin-bottom:8px">اسحب الأداة أو اضغط عليها ثم اختر الملعب</div>
+
+        <div class="tool goal"
+             draggable="true"
+             data-type="goal"
+             data-points="1">
+            <span class="tool-icon">⚽</span>
+            <div class="tool-name">هدف / سلوك منضبط</div>
+            <span class="tool-points">+1 نقطة</span>
+        </div>
+
+        <div class="tool yellow"
+             draggable="true"
+             data-type="yellow"
+             data-points="-1">
+            <span class="tool-icon">🟨</span>
+            <div class="tool-name">بطاقة صفراء</div>
+            <span class="tool-points">−1 نقطة</span>
+        </div>
+
+        <div class="tool red"
+             draggable="true"
+             data-type="red"
+             data-points="-3">
+            <span class="tool-icon">🟥</span>
+            <div class="tool-name">بطاقة حمراء</div>
+            <span class="tool-points">−3 نقاط</span>
+        </div>
+
+    </aside>
+
+    <!-- الملاعب -->
+    <main class="stadium-area">
+
+        <div class="fields" id="fields"></div>
+
+        <div class="actions">
+            <button class="action-btn calculate" onclick="calculateWinner()">
+                🏆 احتساب النقاط وتتويج الفائز
+            </button>
+
+            <button class="action-btn reset" onclick="resetAll()">
+                🧹 تصفية وبدء جديد
+            </button>
+        </div>
+
+        <section class="history">
+            <h2>📋 سجل النقاط</h2>
+            <div class="history-list" id="historyList">
+                <div class="history-item">
+                    ابدأ بسحب ⚽ أو 🟨 أو 🟥 إلى أحد الملاعب.
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- شاشة الفائز -->
+<div class="winner-overlay" id="winnerOverlay">
+
+    <div class="winner-box">
+
+        <div class="trophy">🏆</div>
+
+        <h2>🎉 بطل دوري الفصل 🎉</h2>
+
+        <div class="winner-score" id="winnerText"></div>
+
+        <p>
+            🌟 أحسنتم يا أبطال!<br>
+            بالاجتهاد والتعاون والالتزام نحقق النجاح.
+        </p>
+
+        <button class="close-btn" onclick="closeWinner()">
+            استمرار المسابقة
+        </button>
+
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+/* ================================
+   البيانات الأساسية
+================================ */
+
+const GROUP_COUNT = 6;
+
+let groups = [];
+
+const savedData = localStorage.getItem("classroomFootballData");
+
+if (savedData) {
+    try {
+        groups = JSON.parse(savedData);
+    } catch {
+        createGroups();
+    }
+} else {
+    createGroups();
+}
+
+function createGroups() {
+
+    groups = [];
+
+    for (let i = 0; i < GROUP_COUNT; i++) {
+
+        groups.push({
+            name: `المجموعة ${i + 1}`,
+            score: 0,
+            items: []
+        });
+    }
+}
+
+/* ================================
+   إنشاء الملاعب
+================================ */
+
+function renderFields() {
+
+    const fields = document.getElementById("fields");
+
+    fields.innerHTML = "";
+
+    groups.forEach((group, index) => {
+
+        const card = document.createElement("div");
+
+        card.className = "field-card";
+        card.dataset.index = index;
+
+        card.innerHTML = `
+
+            <div class="field-lines"></div>
+
+            <div class="goal-box goal-left"></div>
+            <div class="goal-box goal-right"></div>
+
+            <input
+                class="group-name"
+                value="${escapeHTML(group.name)}"
+                onchange="changeName(${index}, this.value)"
+            >
+
+            <div class="drop-zone" data-index="${index}">
+                ${renderItems(group.items)}
+            </div>
+
+            <div class="score-box">
+                <div class="score-label">الرصيد الحالي</div>
+
+                <div class="score ${group.score < 0 ? "negative" : ""}">
+                    ${group.score}
+                </div>
+
+            </div>
+        `;
+
+        fields.appendChild(card);
+    });
+
+    addDropEvents();
+
+    saveData();
+}
+
+function renderItems(items) {
+
+    return items
+        .map(item => {
+
+            if (item === "goal") return `<span class="dropped-item">⚽</span>`;
+            if (item === "yellow") return `<span class="dropped-item">🟨</span>`;
+            if (item === "red") return `<span class="dropped-item">🟥</span>`;
+
+            return "";
+
+        })
+        .join("");
+}
+
+/* ================================
+   تعديل اسم المجموعة
+================================ */
+
+function changeName(index, name) {
+
+    groups[index].name =
+        name.trim() || `المجموعة ${index + 1}`;
+
+    saveData();
+
+    addHistory(`✏️ تم تعديل اسم المجموعة إلى: ${groups[index].name}`);
+}
+
+/* ================================
+   السحب والإفلات
+================================ */
+
+let draggedType = null;
+let draggedPoints = 0;
+let selectedToolType = null;
+
+/* السحب على الكمبيوتر + النقر/اللمس على الهاتف واللوحي */
+document.querySelectorAll(".tool").forEach(tool => {
+
+    tool.addEventListener("dragstart", function(e) {
+
+        draggedType = this.dataset.type;
+        draggedPoints = Number(this.dataset.points);
+
+        e.dataTransfer.setData("type", draggedType);
+        e.dataTransfer.effectAllowed = "copy";
+    });
+
+    tool.addEventListener("dragend", function() {
+
+        draggedType = null;
+        draggedPoints = 0;
+    });
+
+    tool.addEventListener("click", function() {
+        selectedToolType = this.dataset.type;
+
+        document.querySelectorAll(".tool").forEach(t => {
+            t.style.outline = "none";
+            t.style.transform = "";
+        });
+
+        this.style.outline = "4px solid #ffe45c";
+        this.style.transform = "scale(1.03)";
+
+        showToast("👆 اختر الملعب الذي تريد إضافة النقطة إليه");
+    });
+});
+
+function addDropEvents() {
+
+    document.querySelectorAll(".field-card").forEach(card => {
+
+        card.addEventListener("dragover", function(e) {
+
+            e.preventDefault();
+
+            this.classList.add("drag-over");
+        });
+
+        card.addEventListener("dragleave", function() {
+
+            this.classList.remove("drag-over");
+        });
+
+        card.addEventListener("drop", function(e) {
+
+            e.preventDefault();
+
+            this.classList.remove("drag-over");
+
+            const type =
+                e.dataTransfer.getData("type") || draggedType || selectedToolType;
+
+            if (!type) {
+                showToast("🎯 اختر أداة أولًا");
+                return;
+            }
+
+            const index = Number(this.dataset.index);
+
+            addPoint(index, type);
+
+            selectedToolType = null;
+            document.querySelectorAll(".tool").forEach(t => {
+                t.style.outline = "none";
+                t.style.transform = "";
+            });
+        });
+    });
+}
+
+/* ================================
+   إضافة النقاط
+================================ */
+
+function addPoint(index, type) {
+
+    let points = 0;
+    let symbol = "";
+
+    if (type === "goal") {
+        points = 1;
+        symbol = "⚽";
+    }
+
+    if (type === "yellow") {
+        points = -1;
+        symbol = "🟨";
+    }
+
+    if (type === "red") {
+        points = -3;
+        symbol = "🟥";
+    }
+
+    groups[index].score += points;
+    groups[index].items.push(type);
+
+    renderFields();
+
+    if (type === "goal") {
+
+        playGoalSound();
+
+        addHistory(
+            `⚽ هدف رائع! ${groups[index].name} حصلت على +1 نقطة`
+        );
+
+        showToast(
+            `⚽ هدف! +1 للمجموعة ${groups[index].name}`
+        );
+
+        createConfetti("⚽");
+    }
+
+    if (type === "yellow") {
+
+        playYellowSound();
+
+        addHistory(
+            `🟨 بطاقة صفراء: ${groups[index].name} −1 نقطة`
+        );
+
+        showToast(
+            `🟨 بطاقة صفراء: −1 للمجموعة`
+        );
+    }
+
+    if (type === "red") {
+
+        playRedSound();
+
+        addHistory(
+            `🟥 بطاقة حمراء: ${groups[index].name} −3 نقاط`
+        );
+
+        showToast(
+            `🟥 بطاقة حمراء: −3 للمجموعة`
+        );
+    }
+
+    saveData();
+}
+
+/* ================================
+   احتساب الفائز
+================================ */
+
+function calculateWinner() {
+
+    if (!groups.length) return;
+
+    let highest = Math.max(
+        ...groups.map(group => group.score)
+    );
+
+    const winners = groups.filter(
+        group => group.score === highest
+    );
+
+    if (winners.length > 1) {
+
+        document.getElementById("winnerText").innerHTML =
+            `🤝 تعادل بين:<br><br>` +
+            winners
+                .map(group => `⭐ ${group.name}`)
+                .join("<br>") +
+            `<br><br>برصيد ${highest} نقطة`;
+
+    } else {
+
+        document.getElementById("winnerText").innerHTML =
+            `🥇 ${winners[0].name}<br>` +
+            `برصيد ${highest} نقطة`;
+
+    }
+
+    document
+        .getElementById("winnerOverlay")
+        .classList.add("show");
+
+    playWinnerSound();
+
+    createConfetti("🏆");
+    createConfetti("⭐");
+    createConfetti("🎉");
+}
+
+/* ================================
+   إغلاق نافذة الفوز
+================================ */
+
+function closeWinner() {
+
+    document
+        .getElementById("winnerOverlay")
+        .classList.remove("show");
+}
+
+/* ================================
+   تصفير
+================================ */
+
+function resetAll() {
+
+    const confirmed = confirm(
+        "هل تريد تصفير جميع النقاط والبدء من جديد؟"
+    );
+
+    if (!confirmed) return;
+
+    groups.forEach((group, index) => {
+
+        group.score = 0;
+        group.items = [];
+
+        if (!group.name || group.name.startsWith("المجموعة")) {
+            group.name = `المجموعة ${index + 1}`;
+        }
+    });
+
+    document.getElementById("historyList").innerHTML = `
+        <div class="history-item">
+            🏁 بدأت مسابقة جديدة! بالتوفيق لجميع المجموعات.
+        </div>
+    `;
+
+    renderFields();
+
+    playResetSound();
+
+    showToast("🧹 تم تصفير جميع النقاط");
+}
+
+/* ================================
+   السجل
+================================ */
+
+function addHistory(text) {
+
+    const list =
+        document.getElementById("historyList");
+
+    const item =
+        document.createElement("div");
+
+    item.className = "history-item";
+
+    const time =
+        new Date().toLocaleTimeString(
+            "ar-OM",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    item.textContent =
+        `${time} — ${text}`;
+
+    list.prepend(item);
+
+    while (list.children.length > 30) {
+        list.removeChild(list.lastChild);
+    }
+}
+
+/* ================================
+   الرسائل
+================================ */
+
+let toastTimer;
+
+function showToast(message) {
+
+    const toast =
+        document.getElementById("toast");
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    }, 1800);
+}
+
+/* ================================
+   المؤثرات الاحتفالية
+================================ */
+
+function createConfetti(symbol) {
+
+    for (let i = 0; i < 12; i++) {
+
+        const item =
+            document.createElement("div");
+
+        item.className = "confetti";
+
+        item.textContent = symbol;
+
+        item.style.left =
+            Math.random() * 100 + "vw";
+
+        item.style.animationDelay =
+            Math.random() * .5 + "s";
+
+        item.style.fontSize =
+            (18 + Math.random() * 20) + "px";
+
+        document.body.appendChild(item);
+
+        setTimeout(() => {
+            item.remove();
+        }, 3000);
+    }
+}
+
+/* ================================
+   الأصوات باستخدام Web Audio
+================================ */
+
+let audioContext = null;
+
+function getAudioContext() {
+
+    if (!audioContext) {
+
+        audioContext =
+            new (window.AudioContext ||
+                 window.webkitAudioContext)();
+    }
+
+    return audioContext;
+}
+
+function tone(
+    frequency,
+    duration,
+    type = "sine",
+    volume = .08
+) {
+
+    const ctx = getAudioContext();
+
+    const oscillator =
+        ctx.createOscillator();
+
+    const gain =
+        ctx.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+
+    gain.gain.setValueAtTime(
+        volume,
+        ctx.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        .001,
+        ctx.currentTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start();
+
+    oscillator.stop(
+        ctx.currentTime + duration
+    );
+}
+
+/* صوت الهدف */
+function playGoalSound() {
+
+    tone(523, .12, "sine", .1);
+
+    setTimeout(() =>
+        tone(659, .12, "sine", .1), 100);
+
+    setTimeout(() =>
+        tone(784, .25, "sine", .12), 200);
+}
+
+/* البطاقة الصفراء */
+function playYellowSound() {
+
+    tone(300, .18, "triangle", .1);
+
+    setTimeout(() =>
+        tone(220, .25, "triangle", .08), 150);
+}
+
+/* البطاقة الحمراء */
+function playRedSound() {
+
+    tone(150, .3, "sawtooth", .12);
+
+    setTimeout(() =>
+        tone(100, .35, "sawtooth", .1), 180);
+}
+
+/* صوت التتويج */
+function playWinnerSound() {
+
+    tone(523, .15, "sine", .1);
+
+    setTimeout(() =>
+        tone(659, .15, "sine", .1), 150);
+
+    setTimeout(() =>
+        tone(784, .15, "sine", .1), 300);
+
+    setTimeout(() =>
+        tone(1046, .5, "sine", .13), 450);
+}
+
+/* صوت التصفير */
+function playResetSound() {
+
+    tone(500, .12, "triangle", .07);
+
+    setTimeout(() =>
+        tone(350, .18, "triangle", .07), 120);
+}
+
+/* ================================
+   حفظ البيانات
+================================ */
+
+function saveData() {
+
+    localStorage.setItem(
+        "classroomFootballData",
+        JSON.stringify(groups)
+    );
+}
+
+/* ================================
+   حماية أسماء المجموعات
+================================ */
+
+function escapeHTML(text) {
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+/* ================================
+   التشغيل الأول
+================================ */
+
+renderFields();
+
+</script>
+
+</body>
+</html>
